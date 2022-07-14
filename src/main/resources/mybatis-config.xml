@@ -7,9 +7,9 @@
         <setting name="logImpl" value="STDOUT_LOGGING"/>
     </settings>
     <typeAliases>
-        <package name="com.bjpowernode.crm.model"/>
+        <package name="com.zzj.crm.model"/>
     </typeAliases>
     <mappers>
-        <package name="com.bjpowernode.crm.mapper"/>
+        <package name="com.zzj.crm.mapper"/>
     </mappers>
 </configuration>
