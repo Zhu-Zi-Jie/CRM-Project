@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%
 	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
 %>
@@ -11,6 +12,15 @@
 <script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
 	<script type="text/javascript">
 		$(function () {
+			//给整个浏览器窗口添加键盘按下事件
+			$(window).keydown(function (event) {
+				//如果按的是回车键，则提交登录请求
+				if (event.keyCode == 13) {
+					//软件模拟单击了一次登录按钮，避免重复代码
+					$("#loginButton").click();
+				}
+			});
+
 			//给登录按钮添加单击事件
 			$("#loginButton").click(function () {
 				//收集参数
@@ -26,6 +36,9 @@
 					alert("密码不能为空");
 					return;
 				}
+				// //显示正在验证
+				// $("#msg").text("正在努力验证...");
+
 				//发送请求
 				$.ajax({
 					url: 'settings/qx/user/login.do',
@@ -44,6 +57,10 @@
 							//提示信息
 							$("#msg").text(data.message);
 						}
+					},
+					beforeSend: function () {//当ajax向后台发送请求之前，会自动执行本函数。如果该函数返回ture，则ajax会真正向后台发送
+						                     //请求；如果该函数返回false，则ajax不会向后台发送请求
+						$("#msg").text("正在努力验证...");
 					}
 				});
 			});
@@ -66,14 +83,20 @@
 			<form action="workbench/index.html" class="form-horizontal" role="form">
 				<div class="form-group form-group-lg">
 					<div style="width: 350px;">
-						<input class="form-control" id="loginAct" type="text" placeholder="用户名">
+						<input class="form-control" id="loginAct" type="text" value="${cookie.loginAct.value}" placeholder="用户名">
 					</div>
 					<div style="width: 350px; position: relative;top: 20px;">
-						<input class="form-control" id="loginPwd" type="password" placeholder="密码">
+						<input class="form-control" id="loginPwd" type="password" value="${cookie.loginPwd.value}" placeholder="密码">
 					</div>
 					<div class="checkbox"  style="position: relative;top: 30px; left: 10px;">
 						<label>
-							<input type="checkbox" id="isRemPwd"> 十天内免登录
+							<c:if test="${not empty cookie.loginAct and not empty cookie.loginPwd}">
+								<input type="checkbox" id="isRemPwd" checked>
+							</c:if>
+							<c:if test="${empty cookie.loginAct or empty cookie.loginPwd}">
+								<input type="checkbox" id="isRemPwd">
+							</c:if>
+							十天内免登录
 						</label>
 						&nbsp;&nbsp;
 						<span id="msg"></span>
