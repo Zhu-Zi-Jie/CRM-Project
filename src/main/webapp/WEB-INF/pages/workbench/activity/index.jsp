@@ -1,22 +1,107 @@
-<!DOCTYPE html>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/";
+%>
 <html>
 <head>
-<meta charset="UTF-8">
-
-<link href="../../jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
-<link href="../../jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
-
-<script type="text/javascript" src="../../jquery/jquery-1.11.1-min.js"></script>
-<script type="text/javascript" src="../../jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
-<script type="text/javascript" src="../../jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
+	<base href="<%=basePath%>">
+	<meta charset="UTF-8">
+	<!--引入bootstrap-datetimepicker的css样式-->
+	<link href="jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+	<link href="jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
+	<!--引入jQuery，必须先引入，因为bootstrap依赖于jQuery-->
+	<script type="text/javascript" src="jquery/jquery-1.11.1-min.js"></script>
+	<script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
+	<!--引入bootstrap-datetimepicker的js源代码-->
+	<script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
+	<script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
 
 <script type="text/javascript">
 
-	$(function(){
-		
-		
-		
+	$(function(){//页面加载好后
+		//给“创建”按钮添加单机事件
+		$("#createActivityButton").click(function () {
+			//可以写一些初始化工作,因为创建玩活动表单后模态窗口只是改变z轴隐藏了，因此上次输入的数据可能还残留在输入框内，需要点击时就清空
+			//重置表单
+			$("#createActivityForm").get(0).reset();
+			//弹出创建市场活动的模态窗口
+			$("#createActivityModal").modal("show");
+		});
+
+		//给保存按钮添加单机事件
+		$("#saveCreateActivityButton").click(function () {
+			//收集表单参数
+			var owner = $("#create-marketActivityOwner").val();
+			var name = $("#create-marketActivityName").val();
+			var startDate = $("#create-startDate").val();
+			var endDate = $("#create-endDate").val();
+			var cost = $.trim($("#create-cost").val());
+			var description = $.trim($("#create-describe").val());
+			//表单验证
+			if (owner == "") {
+				alert("所有者不能为空");
+				return;
+			}
+			if (name == "") {
+				alert("名称不能为空");
+				return;
+			}
+			if (startDate != "" && endDate != "") {
+				//使用字符串的大小代替日期的大小
+				if (endDate < startDate) {
+					alert("结束日期不能比开始日期小");
+					return;
+				}
+			}
+			/*
+			正则表达式
+			定义字符串的匹配模式，可以用来判断指定的具体字符串是否符合匹配模式
+			在js中定义一个正则表达式： var regExp = /....../
+			 */
+			var regExp = /^(([1-9]\d*)|0)$/;
+			if (!regExp.test(cost)) {
+				alert("成本只能为非负整数");
+				return;
+			}
+			//发送异步请求
+			$.ajax({
+				url:'workbench/activity/saveCreateActivity.do',
+				data:{
+					owner:owner,
+					name:name,
+					startDate:startDate,
+					endDate:endDate,
+					cost:cost,
+					description:description
+				},
+				type:'post',
+				dataType:'json',
+				success: function (data) {
+					if (data.code == "1") {
+						//关闭模态窗口
+						$("#createActivityModal").modal("hide");
+						//刷新市场活动列，显示第一页数，保持每页显示条数不变
+
+					} else {
+						//提示信息
+						alert(data.message);
+						//模态窗口不关闭
+						$("#createActivityModal").modal("show");
+					}
+				}
+			})
+		});
+		//当容器加载完后，对容器调用工具函数
+		$(".mydate").datetimepicker({ //使用类选择器同时选中两个容器
+			language:'zh-CH',
+			format:'yyyy-mm-dd',
+			minView:'month',
+			initialDate:new Date(),
+			autoclose:true,
+			todayBtn:true,
+			clearBtn:true
+		});
 	});
 	
 </script>
@@ -35,15 +120,15 @@
 				</div>
 				<div class="modal-body">
 				
-					<form class="form-horizontal" role="form">
+					<form id="createActivityForm" class="form-horizontal" role="form">
 					
 						<div class="form-group">
 							<label for="create-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="create-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
+								  <c:forEach items="${userList}" var="user">
+									  <option value="${user.id}">${user.name}</option>
+								  </c:forEach>
 								</select>
 							</div>
                             <label for="create-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
@@ -53,13 +138,13 @@
 						</div>
 						
 						<div class="form-group">
-							<label for="create-startTime" class="col-sm-2 control-label">开始日期</label>
+							<label for="create-startDate" class="col-sm-2 control-label">开始日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-startTime">
+								<input type="text" class="form-control mydate" id="create-startDate" readonly>
 							</div>
-							<label for="create-endTime" class="col-sm-2 control-label">结束日期</label>
+							<label for="create-endDate" class="col-sm-2 control-label">结束日期</label>
 							<div class="col-sm-10" style="width: 300px;">
-								<input type="text" class="form-control" id="create-endTime">
+								<input type="text" class="form-control mydate" id="create-endDate"readonly>
 							</div>
 						</div>
                         <div class="form-group">
@@ -81,7 +166,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary" data-dismiss="modal">保存</button>
+					<button type="button" class="btn btn-primary" id="saveCreateActivityButton">保存</button>
 				</div>
 			</div>
 		</div>
@@ -105,9 +190,9 @@
 							<label for="edit-marketActivityOwner" class="col-sm-2 control-label">所有者<span style="font-size: 15px; color: red;">*</span></label>
 							<div class="col-sm-10" style="width: 300px;">
 								<select class="form-control" id="edit-marketActivityOwner">
-								  <option>zhangsan</option>
-								  <option>lisi</option>
-								  <option>wangwu</option>
+									<c:forEach items="${userList}" var="user">
+										<option value="${user.id}">${user.name}</option>
+									</c:forEach>
 								</select>
 							</div>
                             <label for="edit-marketActivityName" class="col-sm-2 control-label">名称<span style="font-size: 15px; color: red;">*</span></label>
@@ -238,7 +323,7 @@
 			</div>
 			<div class="btn-toolbar" role="toolbar" style="background-color: #F7F7F7; height: 50px; position: relative;top: 5px;">
 				<div class="btn-group" style="position: relative; top: 18%;">
-				  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createActivityModal"><span class="glyphicon glyphicon-plus"></span> 创建</button>
+				  <button type="button" class="btn btn-primary" id="createActivityButton"><span class="glyphicon glyphicon-plus"></span> 创建</button>
 				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
 				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>

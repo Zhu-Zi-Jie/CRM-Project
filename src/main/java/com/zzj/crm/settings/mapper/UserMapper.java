@@ -2,6 +2,7 @@ package com.zzj.crm.settings.mapper;
 
 import com.zzj.crm.settings.domain.User;
 
+import java.util.List;
 import java.util.Map;
 
 public interface UserMapper {
@@ -54,4 +55,14 @@ public interface UserMapper {
     int updateByPrimaryKey(User record);
 
     User selectUserByLoginActAndPwd(Map<String, Object> map);
+
+    /*
+     * @description:查询所有用户
+     * @author: zzj
+     * @date: 2022/7/16 15:52
+     * @param: []
+     * @return: java.util.List<com.zzj.crm.settings.domain.User>
+     **/
+    List<User> selectAllUser();
+
 }

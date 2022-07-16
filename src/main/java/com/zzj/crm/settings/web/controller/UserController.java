@@ -90,4 +90,19 @@ public class UserController {
         }
         return returnObject;
     }
+
+    @RequestMapping("/settings/qx/user/logout.do")
+    public String logout(HttpServletResponse response, HttpSession session) {
+        //清空cookie
+        Cookie cookie1 = new Cookie("loginAct", "null");
+        cookie1.setMaxAge(0);//间接手段删除浏览器中的cookie
+        response.addCookie(cookie1);
+        Cookie cookie2 = new Cookie("loginPwd", "null");
+        cookie1.setMaxAge(0);
+        response.addCookie(cookie2);
+        //销毁session,释放服务器中的内存
+        session.invalidate();
+        //重定向到首页
+        return "redirect:/"; //借助springmvc框架来重定向，会自动添加工程路径,封装的底层会实现httpServletResponse.sendRedirect("/crm");
+    }
 }
