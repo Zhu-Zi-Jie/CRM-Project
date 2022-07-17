@@ -1,5 +1,6 @@
 package com.zzj.crm.workbench.web.controller;
 
+import com.sun.xml.internal.xsom.impl.scd.Step;
 import com.zzj.crm.commons.constant.Constant;
 import com.zzj.crm.commons.domain.ReturnObject;
 import com.zzj.crm.commons.utils.DateUtils;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @BelongsProject: CRM-Project
@@ -68,5 +71,27 @@ public class ActivityController {
             returnObject.setMessage("系统忙，请稍后重拾");
         }
         return returnObject;
+    }
+
+    @RequestMapping("/workbench/activity/queryActivityByConditionForPage.do")
+    public @ResponseBody
+    Object queryActivityByConditionForPage(String name, String owner, String startDate, String endDate,
+                                           int pageNo, int pageSize) {
+        //封装到map中
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("owner", owner);
+        map.put("startDate", startDate);
+        map.put("endDate", endDate);
+        map.put("beginNo", (pageNo - 1) * pageSize);
+        map.put("pageSize", pageSize);
+        //调用service方法查询数据
+        List<Activity> activityList = activityService.queryActivityByConditionForPage(map);
+        int totalRows = activityService.queryCountOfActivityByCondition(map);
+        //生成json响应信息，封装进对象中
+        Map<String, Object> resultMap = new HashMap<>();
+        resultMap.put("activityList", activityList);
+        resultMap.put("totalRows", totalRows);
+        return resultMap;
     }
 }
