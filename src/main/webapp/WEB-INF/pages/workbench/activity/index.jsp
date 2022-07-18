@@ -118,6 +118,73 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 			//查询所有符合条件数据的第一页以及所有符合条件数据的总条数
 			queryActivityByConditionForPage(1, $("#pagination").bs_pagination('getOption', 'rowsPerPage'));
 		});
+
+		//给“全选”按钮添加单击事件
+		$("#checkAll").click(function () {
+			//如果“全选”按钮是选中状态，则列表所有checkbox都选中
+			// if (this.checked == true) {
+			// 	$("#tBody input[type='checkbox']").prop("checked", true);
+			// } else {
+			// 	$("#tBody input[type='checkbox']").prop("checked", false);
+			// }
+			//优化的代码
+			$("#tBody input[type='checkbox']").prop("checked", this.checked);
+		});
+
+		/*
+		  逻辑对了但实际单击事件不执行，因为此添加事件方法只适用于固有元素，当异步的ajax发送请求动态生成查询行的时候，js代码继续
+		  继续往下执行，执行到此语句的时刻先于动态生成行，对应的input标签还未动态生成，所以不是固有元素添加事件失败
+		*/
+		// $("#tBody input[type='checkbox']").click(function () {
+		// 	//如果列表中的所有checkbox都选中，则“全选”按钮也选中
+		// 	if ($("#tBody input[type='checkbox']").size() == $("#tBody input[type='checkbox']:checked").size()) {
+		// 		$("#checkAll").prop("checked", true);
+		// 	} else {
+		// 		$("#checkAll").prop("checked", false);
+		// 	}
+		//
+		// });
+		$("#tBody").on("click", "input[type='checkbox']", function () {
+			if ($("#tBody input[type='checkbox']").size() == $("#tBody input[type='checkbox']:checked").size()) {
+				$("#checkAll").prop("checked", true);
+			} else {
+				$("#checkAll").prop("checked", false);
+			}
+		});
+
+		//给“删除”按钮添加单机事件
+		$("#deleteActivityButton").click(function () {
+			//收集参数
+			//获取所有选中的checkbox的jQuery对象
+			var checkedIds = $("#tBody input[type='checkbox']:checked");
+			if (checkedIds.size() == 0) {
+				alert("请选择需要删除的市场活动");
+				return;
+			}
+			if (window.confirm("确定删除吗？")) {
+				var ids="";
+				$.each(checkedIds, function () {
+					ids += "id=" + this.value + "&";
+				});
+				ids = ids.substr(0, ids.length - 1);
+				//发送请求
+				$.ajax({
+					url: 'workbench/activity/deleteActivityByIds.do',
+					data:ids,
+					type: 'post',
+					dataType: 'jason',
+					success:function (data) {
+							alert("执行");
+						if (data.code == "1") {
+							//刷新市场活动列表，显示第一页数据，保持每页显示条数不变
+							queryActivityByConditionForPage(1, $("#pagination").bs_pagination('getOption', 'rowsPerPage'));
+						} else {
+							alert(data.message);
+						}
+					}
+				});
+			}
+		});
 	});
 
 	//封装函数需要在入口函数外进行封装
@@ -158,13 +225,15 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				});
 				$("#tBody").html(htmlStr);
 
+				//取消“全选”按钮
+				$("#checkAll").prop("checked", false);
+
 				//计算总页数
 				var totalPages = 1;
 				if (data.totalRows % pageSize == 0) {
 					totalPages = data.totalRows / pageSize;
 				} else {
 					totalPages = parseInt(data.totalRows / pageSize) + 1;
-
 				}
 
 				//调用bs-pagination工具函数，显示翻页信息
@@ -172,7 +241,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 					currentPage: pageNo,
 					rowsPerPage: pageSize,
 					totalRows: data.totalRows,
-					totalPages: 100,
+					totalPages: totalPages,
 					visiblePageLinks: 5,
 					showGoToPage: true,
 					showRowsPerPage: true,
@@ -406,7 +475,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				<div class="btn-group" style="position: relative; top: 18%;">
 				  <button type="button" class="btn btn-primary" id="createActivityButton"><span class="glyphicon glyphicon-plus"></span> 创建</button>
 				  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#editActivityModal"><span class="glyphicon glyphicon-pencil"></span> 修改</button>
-				  <button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-minus"></span> 删除</button>
+				  <button type="button" class="btn btn-danger" id="deleteActivityButton"><span class="glyphicon glyphicon-minus"></span> 删除</button>
 				</div>
 				<div class="btn-group" style="position: relative; top: 18%;">
                     <button type="button" class="btn btn-default" data-toggle="modal" data-target="#importActivityModal" ><span class="glyphicon glyphicon-import"></span> 上传列表数据（导入）</button>
@@ -418,7 +487,7 @@ String basePath = request.getScheme() + "://" + request.getServerName() + ":" + 
 				<table class="table table-hover">
 					<thead>
 						<tr style="color: #B3B3B3;">
-							<td><input type="checkbox" /></td>
+							<td><input type="checkbox" id="checkAll" /></td>
 							<td>名称</td>
                             <td>所有者</td>
 							<td>开始日期</td>
