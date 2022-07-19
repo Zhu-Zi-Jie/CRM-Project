@@ -289,7 +289,7 @@
 					},
 					type:'post',
 					dataType:'json',
-					success:function (){
+					success:function (data){
 						if(data.code=="1"){
 							//关闭模态窗口
 							$("#editActivityModal").modal("hide");
