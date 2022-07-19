@@ -26,7 +26,7 @@ import java.util.Map;
  * @BelongsPackage: com.zzj.crm.workbench.web.controller
  * @Author: zzj
  * @CreateTime: 2022-07-16  16:00
- * @Description: TODO
+ * @Description: 负责处理访问/WEB-INF/pages/workbench/activity目录下资源的请求
  * @Version: 1.0
  */
 @Controller
@@ -74,9 +74,8 @@ public class ActivityController {
     }
 
     @RequestMapping("/workbench/activity/queryActivityByConditionForPage.do")
-    public @ResponseBody
-    Object queryActivityByConditionForPage(String name, String owner, String startDate, String endDate,
-                                           int pageNo, int pageSize) {
+    public @ResponseBody Object queryActivityByConditionForPage(String name, String owner, String startDate, String endDate,
+                                                                int pageNo, int pageSize) {
         //封装到map中
         Map<String, Object> map = new HashMap<>();
         map.put("name", name);

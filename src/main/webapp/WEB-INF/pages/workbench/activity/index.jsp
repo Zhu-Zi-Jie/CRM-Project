@@ -8,14 +8,20 @@
 	<base href="<%=basePath%>">
 	<meta charset="UTF-8">
 
-	<link href="jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
-	<link rel="stylesheet" type="text/css" href="jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css">
-	<link rel="stylesheet" type="text/css" href="jquery/bs_pagination-master/css/jquery.bs_pagination.min.css">
-
+	<!--引入bootstrap-datetimepicker插件-->
+	<!--引入jQuery，必须先引入，因为bootstrap依赖于jQuery-->
 	<script type="text/javascript" src="jquery/jquery-1.11.1-min.js"></script>
+	<!--引入bootstrap-->
 	<script type="text/javascript" src="jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
+	<link href="jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+	<!--引入bootstrap-datetimepicker的css样式-->
+	<link href="jquery/bootstrap-datetimepicker-master/css/bootstrap-datetimepicker.min.css" type="text/css" rel="stylesheet" />
+	<!--引入bootstrap-datetimepicker的js源代码-->
 	<script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/js/bootstrap-datetimepicker.js"></script>
 	<script type="text/javascript" src="jquery/bootstrap-datetimepicker-master/locale/bootstrap-datetimepicker.zh-CN.js"></script>
+
+	<!--引入bs_pagination插件-->
+	<link rel="stylesheet" type="text/css" href="jquery/bs_pagination-master/css/jquery.bs_pagination.min.css" />
 	<script type="text/javascript" src="jquery/bs_pagination-master/js/jquery.bs_pagination.min.js"></script>
 	<script type="text/javascript" src="jquery/bs_pagination-master/localization/en.js"></script>
 	<script type="text/javascript">
@@ -23,10 +29,9 @@
 		$(function(){
 			//给"创建"按钮添加单击事件
 			$("#createActivityBtn").click(function () {
-				//初始化工作
+				//可以写一些初始化工作,因为创建玩活动表单后模态窗口只是改变z轴隐藏了，因此上次输入的数据可能还残留在输入框内，需要点击时就清空
 				//重置表单
 				$("#createActivityForm").get(0).reset();
-
 				//弹出创建市场活动的模态窗口
 				$("#createActivityModal").modal("show");
 			});
@@ -34,24 +39,24 @@
 			//给"保存"按钮添加单击事件
 			$("#saveCreateActivityBtn").click(function () {
 				//收集参数
-				var owner=$("#create-marketActivityOwner").val();
-				var name=$.trim($("#create-marketActivityName").val());
-				var startDate=$("#create-startDate").val();
-				var endDate=$("#create-endDate").val();
-				var cost=$.trim($("#create-cost").val());
-				var description=$.trim($("#create-description").val());
+				var owner = $("#create-marketActivityOwner").val();
+				var name = $.trim($("#create-marketActivityName").val());
+				var startDate = $("#create-startDate").val();
+				var endDate = $("#create-endDate").val();
+				var cost = $.trim($("#create-cost").val());
+				var description = $.trim($("#create-description").val());
 				//表单验证
-				if(owner==""){
+				if (owner == "") {
 					alert("所有者不能为空");
 					return;
 				}
-				if(name==""){
+				if (name == "") {
 					alert("名称不能为空");
 					return;
 				}
-				if(startDate!=""&&endDate!=""){
+				if (startDate != "" && endDate != "") {
 					//使用字符串的大小代替日期的大小
-					if(endDate<startDate){
+					if (endDate < startDate) {
 						alert("结束日期不能比开始日期小");
 						return;
 					}
@@ -80,7 +85,7 @@
                          ?:匹配0次或者1次，相当于{0,1}
                  */
 				var regExp=/^(([1-9]\d*)|0)$/;
-				if(!regExp.test(cost)){
+				if (!regExp.test(cost)) {
 					alert("成本只能为非负整数");
 					return;
 				}
@@ -98,15 +103,13 @@
 					type:'post',
 					dataType:'json',
 					success:function (data) {
-						if(data.code=="1"){
+						if (data.code == "1") {
 							//关闭模态窗口
 							$("#createActivityModal").modal("hide");
 							//刷新市场活动列，显示第一页数据，保持每页显示条数不变
-							queryActivityByConditionForPage(1,$("#demo_pag1").bs_pagination('getOption', 'rowsPerPage'));
-						}else{
-							//提示信息
+							queryActivityByConditionForPage(1, $("#pagination").bs_pagination('getOption', 'rowsPerPage'));
+						} else {
 							alert(data.message);
-							//模态窗口不关闭
 							$("#createActivityModal").modal("show");//可以不写。
 						}
 					}
@@ -114,8 +117,7 @@
 			});
 
 			//当容器加载完成之后，对容器调用工具函数
-			//$("input[name='mydate']").datetimepicker({
-			$(".mydate").datetimepicker({
+			$(".mydate").datetimepicker({ //使用类选择器同时选中两种容器
 				language:'zh-CN', //语言
 				format:'yyyy-mm-dd',//日期的格式
 				minView:'month', //可以选择的最小视图
@@ -131,7 +133,7 @@
 			//给"查询"按钮添加单击事件
 			$("#queryActivityBtn").click(function () {
 				//查询所有符合条件数据的第一页以及所有符合条件数据的总条数;
-				queryActivityByConditionForPage(1,$("#demo_pag1").bs_pagination('getOption', 'rowsPerPage'));
+				queryActivityByConditionForPage(1,$("#pagination").bs_pagination('getOption', 'rowsPerPage'));
 			});
 
 			//给"全选"按钮添加单击事件
@@ -146,6 +148,10 @@
 				$("#tBody input[type='checkbox']").prop("checked",this.checked);
 			});
 
+			/*
+		  逻辑对了但实际单击事件不执行，因为此添加事件方法只适用于固有元素，当异步的ajax发送请求动态生成查询行的时候，js代码继续
+		  继续往下执行，执行到此语句的时刻先于动态生成行，对应的input标签还未动态生成，所以不是固有元素添加事件失败
+			*/
 			/*$("#tBody input[type='checkbox']").click(function () {
                 //如果列表中的所有checkbox都选中，则"全选"按钮也选中
                 if($("#tBody input[type='checkbox']").size()==$("#tBody input[type='checkbox']:checked").size()){
@@ -156,10 +162,10 @@
             });*/
 			$("#tBody").on("click","input[type='checkbox']",function () {
 				//如果列表中的所有checkbox都选中，则"全选"按钮也选中
-				if($("#tBody input[type='checkbox']").size()==$("#tBody input[type='checkbox']:checked").size()){
-					$("#chckAll").prop("checked",true);
-				}else{//如果列表中的所有checkbox至少有一个没选中，则"全选"按钮也取消
-					$("#chckAll").prop("checked",false);
+				if ($("#tBody input[type='checkbox']").size() == $("#tBody input[type='checkbox']:checked").size()) {
+					$("#chckAll").prop("checked", true);
+				} else {//如果列表中的所有checkbox至少有一个没选中，则"全选"按钮也取消
+					$("#chckAll").prop("checked", false);
 				}
 			});
 
@@ -167,8 +173,8 @@
 			$("#deleteActivityBtn").click(function () {
 				//收集参数
 				//获取列表中所有被选中的checkbox
-				var chekkedIds=$("#tBody input[type='checkbox']:checked");
-				if(chekkedIds.size()==0){
+				var chekkedIds = $("#tBody input[type='checkbox']:checked");
+				if (chekkedIds.size() == 0) {
 					alert("请选择要删除的市场活动");
 					return;
 				}
@@ -178,7 +184,7 @@
 					$.each(chekkedIds,function () {//id=xxxx&id=xxx&.....&id=xxx&
 						ids+="id="+this.value+"&";
 					});
-					ids=ids.substr(0,ids.length-1);//id=xxxx&id=xxx&.....&id=xxx
+					ids = ids.substr(0, ids.length - 1);//id=xxxx&id=xxx&.....&id=xxx
 
 					//发送请求
 					$.ajax({
@@ -187,10 +193,10 @@
 						type:'post',
 						dataType:'json',
 						success:function (data) {
-							if(data.code=="1"){
+							if (data.code == "1") {
 								//刷新市场活动列表,显示第一页数据,保持每页显示条数不变
-								queryActivityByConditionForPage(1,$("#demo_pag1").bs_pagination('getOption', 'rowsPerPage'));
-							}else{
+								queryActivityByConditionForPage(1, $("#pagination").bs_pagination('getOption', 'rowsPerPage'));
+							} else {
 								//提示信息
 								alert(data.message);
 							}
@@ -204,11 +210,11 @@
 				//收集参数
 				//获取列表中被选中的checkbox
 				var chkedIds=$("#tBody input[type='checkbox']:checked");
-				if(chkedIds.size()==0){
+				if (chkedIds.size() == 0) {
 					alert("请选择要修改的市场活动");
 					return;
 				}
-				if(chkedIds.size()>1){
+				if (chkedIds.size() > 1) {
 					alert("每次只能修改一条市场活动");
 					return;
 				}
@@ -239,12 +245,13 @@
 			});
 		});
 
+		//封装函数需要在入口函数外进行封装
 		function queryActivityByConditionForPage(pageNo,pageSize) {
 			//收集参数
-			var name=$("#query-name").val();
-			var owner=$("#query-owner").val();
-			var startDate=$("#query-startDate").val();
-			var endDate=$("#query-endDate").val();
+			var name = $("#query-name").val();
+			var owner = $("#query-owner").val();
+			var startDate = $("#query-startDate").val();
+			var endDate = $("#query-endDate").val();
 			//var pageNo=1;
 			//var pageSize=10;
 			//发送请求
@@ -266,7 +273,7 @@
 					//显示市场活动的列表
 					//遍历activityList，拼接所有行数据
 					var htmlStr="";
-					$.each(data.activityList,function (index,obj) {
+					$.each(data.activityList, function (index,obj) {
 						htmlStr+="<tr class=\"active\">";
 						htmlStr+="<td><input type=\"checkbox\" value=\""+obj.id+"\"/></td>";
 						htmlStr+="<td><a style=\"text-decoration: none; cursor: pointer;\" onclick=\"window.location.href='detail.html';\">"+obj.name+"</a></td>";
@@ -278,37 +285,31 @@
 					$("#tBody").html(htmlStr);
 
 					//取消"全选"按钮
-					$("#chckAll").prop("checked",false);
+					$("#chckAll").prop("checked", false);
 
 					//计算总页数
 					var totalPages=1;
-					if(data.totalRows%pageSize==0){
-						totalPages=data.totalRows/pageSize;
-					}else{
-						totalPages=parseInt(data.totalRows/pageSize)+1;
+					if (data.totalRows % pageSize == 0) {
+						totalPages = data.totalRows / pageSize;
+					} else {
+						totalPages = parseInt(data.totalRows / pageSize) + 1;
 					}
 
 					//对容器调用bs_pagination工具函数，显示翻页信息
-					$("#demo_pag1").bs_pagination({
+					$("#pagination").bs_pagination({
 						currentPage:pageNo,//当前页号,相当于pageNo
-
 						rowsPerPage:pageSize,//每页显示条数,相当于pageSize
 						totalRows:data.totalRows,//总条数
 						totalPages: totalPages,  //总页数,必填参数.
-
 						visiblePageLinks:5,//最多可以显示的卡片数
-
 						showGoToPage:true,//是否显示"跳转到"部分,默认true--显示
 						showRowsPerPage:true,//是否显示"每页显示条数"部分。默认true--显示
 						showRowsInfo:true,//是否显示记录的信息，默认true--显示
 
 						//用户每次切换页号，都自动触发本函数;
 						//每次返回切换页号之后的pageNo和pageSize
-						onChangePage: function(event,pageObj) { // returns page_num and rows_per_page after a link has clicked
-							//js代码
-							//alert(pageObj.currentPage);
-							//alert(pageObj.rowsPerPage);
-							queryActivityByConditionForPage(pageObj.currentPage,pageObj.rowsPerPage);
+						onChangePage: function(event, pageObj) { // returns page_num and rows_per_page after a link has clicked
+							queryActivityByConditionForPage(pageObj.currentPage, pageObj.rowsPerPage);
 						}
 					});
 				}
@@ -571,7 +572,7 @@
                 </tr>--%>
 				</tbody>
 			</table>
-			<div id="demo_pag1"></div>
+			<div id="pagination"></div>
 		</div>
 
 		<%--<div style="height: 50px; position: relative;top: 30px;">
