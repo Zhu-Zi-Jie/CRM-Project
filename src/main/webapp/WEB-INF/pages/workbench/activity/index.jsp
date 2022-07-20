@@ -305,6 +305,41 @@
 				});
 			});
 
+			//给“批量导出”按钮添加单击事件
+			$("#exportActivityAllBtn").click(function () {
+				//发送同步请求
+				window.location.href = "workbench/activity/exportAllActivities.do";
+			});
+
+			//给“选择导出”按钮添加单击事件
+			$("#exportActivityXzBtn").click(function () {
+				//获取列表中所有被选中的checkbox
+				var chekkedIds = $("#tBody input[type='checkbox']:checked");
+				if (chekkedIds.size() == 0) {
+					alert("请选择要导出的市场活动");
+					return;
+				}
+
+				if(window.confirm("确定导出已选的市场活动吗？")){
+					var ids="";
+					$.each(chekkedIds,function () {//id=xxxx&id=xxx&.....&id=xxx&
+						ids+=this.value+",";
+					});
+					ids = ids.substr(0, ids.length - 1);//id=xxxx&id=xxx&.....&id=xxx
+
+					//利用ajax发送同步请求
+					$.ajax({
+						url:'workbench/activity/exportSelectedActivities.do',
+						data:{
+						ids:ids
+						},
+						type:'post',
+						async:false,
+					});
+				}
+			});
+
+
 		});
 
 		//封装函数需要在入口函数外进行封装
