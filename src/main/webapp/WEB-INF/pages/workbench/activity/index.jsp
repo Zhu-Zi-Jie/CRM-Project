@@ -327,15 +327,17 @@
 					});
 					ids = ids.substr(0, ids.length - 1);//id=xxxx&id=xxx&.....&id=xxx
 
+					window.location.href = "workbench/activity/exportSelectedActivities.do?ids=" + ids;
+					//以下代码在别人电脑里偶尔成功，在自己电脑里一次没成，数据都发送过去了但还是不能弹出下载文件
 					//利用ajax发送同步请求
-					$.ajax({
-						url:'workbench/activity/exportSelectedActivities.do',
-						data:{
-						ids:ids
-						},
-						type:'post',
-						async:false,
-					});
+					// $.ajax({
+					// 	url:'workbench/activity/exportSelectedActivities.do',
+					// 	data:{
+					// 	ids:ids
+					// 	},
+					// 	type:'post',
+					// 	async:false,
+					// });
 				}
 			});
 
