@@ -77,4 +77,10 @@ public interface ActivityMapper {
 
     //根据条件查询市场活动
     List<Activity> selectActivitiesByCondition(String[] ids);
+
+    //根据excel批量保存创建的市场活动
+    int insertActivityByList(List<Activity> activityList);
+
+    //根据id查询市场活动的明细信息
+    Activity selectActivityForDetailById(String id);
 }

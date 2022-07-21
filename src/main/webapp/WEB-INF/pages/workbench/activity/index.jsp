@@ -341,7 +341,52 @@
 				}
 			});
 
+			//给“导入”按钮添加单机事件
+			$("#importActivityBtn").click(function () {
+				//收集参数
+				var activityFileName=$("#activityFile").val();
+				var suffix=activityFileName.substr(activityFileName.lastIndexOf(".")+1).toLocaleLowerCase();//xls,XLS,Xls,xLs,....
+				if(suffix!="xls"){
+					alert("只支持xls文件");
+					return;
+				}
+				var activityFile=$("#activityFile")[0].files[0];
+				if(activityFile.size>5*1024*1024){
+					alert("文件大小不超过5MB");
+					return;
+				}
 
+				//FormData是ajax提供的接口,可以模拟键值对向后台提交参数;
+				//FormData最大的优势是不但能提交文本数据，还能提交二进制数据
+				var formData=new FormData();
+				formData.append("activityFile",activityFile);
+				formData.append("userName","张三");
+
+				//发送请求
+				$.ajax({
+					url:'workbench/activity/importActivity.do',
+					data:formData,
+					processData:false,//设置ajax向后台提交参数之前，是否把参数统一转换成字符串：true--是,false--不是,默认是true
+					contentType:false,//设置ajax向后台提交参数之前，是否把所有的参数统一按urlencoded编码：true--是,false--不是，默认是true
+					type:'post',
+					dataType:'json',
+					success:function (data) {
+						if(data.code=="1"){
+							//提示成功导入记录条数
+							alert("成功导入"+data.retData+"条记录");
+							//关闭模态窗口
+							$("#importActivityModal").modal("hide");
+							//刷新市场活动列表,显示第一页数据,保持每页显示条数不变
+							queryActivityByConditionForPage(1,$("#demo_pag1").bs_pagination('getOption', 'rowsPerPage'));
+						}else{
+							//提示信息
+							alert(data.message);
+							//模态窗口不关闭
+							$("#importActivityModal").modal("show");
+						}
+					}
+				});
+			});
 		});
 
 		//封装函数需要在入口函数外进行封装
