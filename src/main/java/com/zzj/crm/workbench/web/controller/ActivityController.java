@@ -9,6 +9,8 @@ import com.zzj.crm.commons.utils.UUIDUtils;
 import com.zzj.crm.settings.domain.User;
 import com.zzj.crm.settings.service.UserService;
 import com.zzj.crm.workbench.domain.Activity;
+import com.zzj.crm.workbench.domain.ActivityRemark;
+import com.zzj.crm.workbench.service.ActivityRemarkService;
 import com.zzj.crm.workbench.service.ActivityService;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -45,6 +47,9 @@ public class ActivityController {
 
     @Autowired
     private ActivityService activityService;
+
+    @Autowired
+    private ActivityRemarkService activityRemarkService;
 
     @RequestMapping("/workbench/activity/index.do")
     public String index(HttpServletRequest request) {
@@ -374,5 +379,17 @@ public class ActivityController {
             returnObject.setMessage("系统忙，请稍后重试....");
         }
         return returnObject;
+    }
+
+    @RequestMapping("/workbench/activity/detailActivity.do")
+    public String detailActivity(String id, HttpServletRequest request) {
+        //调用service层方法，查询数据
+        Activity activity = activityService.queryActivityForDetailById(id);
+        List<ActivityRemark> remarkList = activityRemarkService.queryActivityRemarkForDetailByActivityId(id);
+        //把数据保存到request中
+        request.setAttribute("activity", activity);//这个操作重要
+        request.setAttribute("remarkList", remarkList);
+        //请求转发
+        return "workbench/activity/detail";
     }
 }

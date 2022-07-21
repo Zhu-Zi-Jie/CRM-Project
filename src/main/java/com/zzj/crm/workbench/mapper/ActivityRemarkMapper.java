@@ -55,4 +55,13 @@ public interface ActivityRemarkMapper {
 
     //根据activityId查询市场活动下所有备注的明细信息
     List<ActivityRemark> selectActivityRemarkForDetailByActivityId(String activityId);
+
+    //保存创建的市场活动备注
+    int insertActivityRemark(ActivityRemark remark);
+
+    //根据id删除市场活动
+    int deleteActivityRemarkById(String id);
+
+    //保存修改的市场活动信息
+    int updateActivityRemark(ActivityRemark remark);
 }

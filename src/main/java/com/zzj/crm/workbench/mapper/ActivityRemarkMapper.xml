@@ -171,6 +171,22 @@
     from tbl_activity_remark ar
            join tbl_user u1 on ar.create_by=u1.id
            left join tbl_user u2 on ar.edit_by=u2.id
-    where ar.activity_id=#{activityId}
+    where ar.activity_id = #{activityId}
+    order by ar.create_time asc
   </select>
+
+  <insert id="insertActivityRemark" parameterType="com.zzj.crm.workbench.domain.ActivityRemark">
+    insert into tbl_activity_remark(id, note_content, create_time, create_by, edit_flag, activity_id)
+    values(#{id}, #{noteContent}, #{createTime}, #{createBy}, #{editFlag}, #{activityId})
+  </insert>
+
+  <delete id="deleteActivityRemarkById" parameterType="string">
+    delete from tbl_activity_remark where id = #{id}
+  </delete>
+
+  <update id="updateActivityRemark" parameterType="com.zzj.crm.workbench.domain.ActivityRemark">
+    update tbl_activity_remark
+    set note_content = #{noteContent}, edit_time = #{editTime}, edit_by = #{editBy}, edit_flag = #{editFlag}
+    where id = #{id}
+  </update>
 </mapper>
