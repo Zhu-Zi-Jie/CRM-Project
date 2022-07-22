@@ -83,4 +83,7 @@ public interface ActivityMapper {
 
     //根据id查询市场活动的明细信息
     Activity selectActivityForDetailById(String id);
+
+    //根据clueId查询该线索相关联的市场活动的明细信息
+    List<Activity> selectActivityForDetailByClueId(String clueId);
 }
