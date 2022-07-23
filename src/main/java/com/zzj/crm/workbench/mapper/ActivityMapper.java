@@ -93,6 +93,6 @@ public interface ActivityMapper {
     //根据ids查询为线索关联选择框提供的市场活动明细信息
     List<Activity> selectActivityForDetailByIds(String[] ids);
 
-    //根据name模糊查询市场活动，并且查询那些跟clueId关联过的市场活动
+    //根据name为创建交易模态窗口模糊查询并且跟clueId关联过的市场活动
     List<Activity> selectActivityForConvertByNameClueId(Map<String, Object> map);
 }

@@ -57,7 +57,7 @@ public interface ClueMapper {
     //根据id查询线索的明细信息
     Clue selectClueForDetailById(String id);
 
-    //根据id查询线索的信息
+    //根据id查询线索的信息，某些信息不再查出字符给用户看，而是需要查出外键id值来完成关系转换功能
     Clue selectClueById(String id);
 
     //根据id删除线索

@@ -177,4 +177,54 @@ public class ClueController {
 
         return returnObject;
     }
+
+    @RequestMapping("/workbench/clue/toConvert.do")
+    public String toConvert(String id,HttpServletRequest request){
+        //调用service层方法，查询线索的明细信息
+        Clue clue=clueService.queryClueForDetailById(id);
+        List<DicValue> stageList=dicValueService.queryDicValueByTypeCode("stage");
+        //把数据保存到request中
+        request.setAttribute("clue",clue);
+        request.setAttribute("stageList",stageList); //保存阶段状态的数据字典值
+        //请求转发
+        return "workbench/clue/convert";
+    }
+
+    @RequestMapping("/workbench/clue/queryActivityForConvertByNameClueId.do")
+    public @ResponseBody Object queryActivityForConvertByNameClueId(String activityName,String clueId){
+        //封装参数
+        Map<String,Object> map=new HashMap<>();
+        map.put("activityName",activityName);
+        map.put("clueId",clueId);
+        //调用service层方法，查询市场活动
+        List<Activity> activityList=activityService.queryActivityForConvertByNameClueId(map);
+        //根据查询结果，返回响应信息
+        return activityList;
+    }
+
+    @RequestMapping("/workbench/clue/convertClue.do")
+    public @ResponseBody Object convertClue(String clueId,String money,String name,String expectedDate,String stage,String activityId,String isCreateTran,HttpSession session){
+        //封装参数
+        Map<String,Object> map=new HashMap<>();
+        map.put("clueId",clueId);
+        map.put("money",money);
+        map.put("name",name);
+        map.put("expectedDate",expectedDate);
+        map.put("stage",stage);
+        map.put("activityId",activityId);
+        map.put("isCreateTran",isCreateTran);
+        map.put(Constant.SESSION_USER,session.getAttribute(Constant.SESSION_USER));
+
+        ReturnObject returnObject=new ReturnObject();
+        try {
+            //调用service层方法，保存线索转换
+            clueService.saveConvertClue(map);
+            returnObject.setCode(Constant.RETURN_OBJECT_CODE_SUCCESS);
+        }catch (Exception e){
+            e.printStackTrace();
+            returnObject.setCode(Constant.RETURN_OBJECT_CODE_FAIL);
+            returnObject.setMessage("系统忙，请稍后重试....");
+        }
+        return returnObject;
+    }
 }
