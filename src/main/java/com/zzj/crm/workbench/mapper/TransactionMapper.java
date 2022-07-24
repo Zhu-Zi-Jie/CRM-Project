@@ -1,6 +1,9 @@
 package com.zzj.crm.workbench.mapper;
 
+import com.zzj.crm.workbench.domain.FunnelVO;
 import com.zzj.crm.workbench.domain.Transaction;
+
+import java.util.List;
 
 public interface TransactionMapper {
     /**
@@ -56,4 +59,8 @@ public interface TransactionMapper {
 
     //根据id查询交易的明细信息
     Transaction selectTranForDetailById(String id);
+
+    //查询交易表中各个阶段的数据量
+    List<FunnelVO> selectCountOfTranGroupByStage();
+
 }
